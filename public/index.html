@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Reserva tu videollamada · hisfia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+
+body{
+  min-height:100%;
+  background:#f0f2f7;
+  font-family:'Inter',system-ui,sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:32px 16px;
+}
+
+/* ─── Card ─── */
+.card{
+  display:flex;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 8px 48px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.06);
+  overflow:hidden;
+  width:100%;
+  max-width:860px;
+  min-height:580px;
+}
+
+/* ─── Left panel ─── */
+.left{
+  width:300px;
+  flex-shrink:0;
+  border-right:1px solid #eef0f5;
+  padding:40px 32px;
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+
+.avatar{
+  width:64px;height:64px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#6c8fff,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:800;color:#fff;
+  margin-bottom:20px;
+  box-shadow:0 4px 16px rgba(108,143,255,.35);
+}
+
+.host-name{font-size:13px;font-weight:600;color:#64748b;margin-bottom:4px}
+.meeting-title{font-size:22px;font-weight:700;color:#0f172a;line-height:1.25;margin-bottom:24px}
+
+.meta-list{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
+.meta-row{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#475569}
+.meta-icon{
+  width:28px;height:28px;flex-shrink:0;
+  background:#f1f5f9;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+
+.divider{height:1px;background:#eef0f5;margin:20px 0}
+
+.left-footer{
+  margin-top:auto;
+  font-size:11.5px;color:#94a3b8;
+  display:flex;align-items:center;gap:6px;
+}
+.dot-live{
+  width:7px;height:7px;border-radius:50%;
+  background:#22c55e;
+  box-shadow:0 0 0 2px rgba(34,197,94,.2);
+  flex-shrink:0;
+}
+
+/* ─── Right panel ─── */
+.right{
+  flex:1;
+  padding:40px 36px;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+/* Steps */
+.step{display:none;flex-direction:column;flex:1}
+.step.active{display:flex}
+
+/* ─── Calendar ─── */
+.cal-top{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:28px;
+}
+.step-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px}
+.cal-month{font-size:18px;font-weight:700;color:#0f172a}
+
+.cal-arrows{display:flex;gap:6px}
+.arr-btn{
+  width:34px;height:34px;
+  border-radius:9px;
+  border:1.5px solid #e2e8f0;
+  background:#fff;
+  color:#64748b;
+  font-size:17px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.arr-btn:hover{border-color:#6c8fff;color:#6c8fff;background:#f5f7ff}
+.arr-btn:disabled{opacity:.35;cursor:default}
+
+.cal-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:4px;
+}
+.cal-head{
+  text-align:center;
+  font-size:11px;font-weight:600;
+  color:#94a3b8;letter-spacing:.04em;
+  padding-bottom:12px;
+  text-transform:uppercase;
+}
+.cal-cell{
+  aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:10px;
+  font-size:14px;font-weight:500;
+  color:#0f172a;
+  transition:all .12s;
+  cursor:default;
+  position:relative;
+}
+.cal-cell.empty,.cal-cell.past{color:#cbd5e1;cursor:default}
+.cal-cell.avail{
+  color:#6c8fff;
+  font-weight:600;
+  cursor:pointer;
+}
+.cal-cell.avail:hover{
+  background:#eff3ff;
+  transform:scale(1.08);
+}
+.cal-cell.avail.sel{
+  background:#6c8fff;
+  color:#fff;
+  box-shadow:0 4px 14px rgba(108,143,255,.4);
+  transform:scale(1.08);
+}
+.cal-cell.today::after{
+  content:'';
+  position:absolute;bottom:3px;
+  width:4px;height:4px;border-radius:50%;
+  background:#6c8fff;
+}
+.cal-cell.avail.sel.today::after{background:#fff}
+
+/* ─── Times ─── */
+.back-row{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:24px;
+}
+.back-btn{
+  width:34px;height:34px;
+  border-radius:9px;border:1.5px solid #e2e8f0;
+  background:#fff;color:#64748b;
+  font-size:17px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;flex-shrink:0;
+}
+.back-btn:hover{border-color:#6c8fff;color:#6c8fff;background:#f5f7ff}
+.back-label{font-size:18px;font-weight:700;color:#0f172a}
+.back-sub{font-size:12.5px;color:#94a3b8;margin-top:2px}
+
+.times-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  overflow-y:auto;
+}
+.time-pill{
+  padding:11px 6px;
+  border-radius:11px;
+  border:1.5px solid #e2e8f0;
+  background:#fff;
+  color:#0f172a;
+  font-size:14px;font-weight:500;
+  text-align:center;
+  cursor:pointer;
+  font-family:inherit;
+  transition:all .13s;
+}
+.time-pill:hover{border-color:#6c8fff;color:#6c8fff;background:#f5f7ff}
+.time-pill.sel{
+  border-color:#6c8fff;
+  background:#6c8fff;
+  color:#fff;
+  font-weight:600;
+  box-shadow:0 4px 12px rgba(108,143,255,.3);
+}
+
+/* ─── Form ─── */
+.form-pill{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#f1f5f9;
+  border-radius:20px;padding:6px 14px;
+  font-size:13px;color:#475569;font-weight:500;
+  margin-bottom:18px;
+}
+.form-pill span{color:#6c8fff;font-weight:600}
+
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:11px;font-weight:600;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase}
+.field input,.field textarea{
+  padding:10px 14px;
+  border-radius:9px;
+  border:1.5px solid #e2e8f0;
+  color:#0f172a;
+  font-size:14px;font-family:inherit;
+  outline:none;resize:none;
+  transition:border-color .15s;
+  background:#fff;
+}
+.field input:focus,.field textarea:focus{border-color:#6c8fff;box-shadow:0 0 0 3px rgba(108,143,255,.1)}
+.field input::placeholder,.field textarea::placeholder{color:#cbd5e1}
+
+.btn-book{
+  width:100%;
+  margin-top:20px;
+  padding:13px;
+  border-radius:11px;border:none;
+  background:linear-gradient(135deg,#6c8fff,#a78bfa);
+  color:#fff;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  box-shadow:0 4px 18px rgba(108,143,255,.35);
+  transition:opacity .15s,transform .12s;
+}
+.btn-book:hover{opacity:.9;transform:translateY(-1px)}
+.btn-book:active{transform:translateY(0)}
+.btn-book:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+.err{
+  display:none;
+  margin-top:12px;padding:10px 14px;
+  border-radius:9px;
+  background:#fef2f2;border:1px solid #fecaca;
+  font-size:13px;color:#ef4444;
+}
+
+/* ─── Success ─── */
+#step-ok{align-items:center;justify-content:center;text-align:center;gap:14px}
+.ok-ring{
+  width:88px;height:88px;border-radius:50%;
+  background:linear-gradient(135deg,#6c8fff,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-size:40px;
+  box-shadow:0 8px 28px rgba(108,143,255,.4);
+  animation:pop .45s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.ok-title{font-size:24px;font-weight:700;color:#0f172a}
+.ok-sub{font-size:14px;color:#64748b;line-height:1.7;max-width:300px}
+.meet-cta{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 26px;border-radius:11px;
+  background:#6c8fff;color:#fff;
+  font-size:14px;font-weight:600;
+  text-decoration:none;
+  box-shadow:0 4px 14px rgba(108,143,255,.35);
+  transition:opacity .15s;
+}
+.meet-cta:hover{opacity:.88}
+
+/* ─── Skeleton ─── */
+.skel{
+  height:36px;border-radius:9px;
+  background:linear-gradient(90deg,#f1f5f9 25%,#e8ecf5 50%,#f1f5f9 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.4s infinite;
+}
+@keyframes shimmer{to{background-position:-200% 0}}
+
+/* ─── Responsive ─── */
+@media(max-width:660px){
+  body{padding:0;align-items:flex-start}
+  .card{
+    flex-direction:column;min-height:100svh;
+    border-radius:0;box-shadow:none;
+    border:none;
+  }
+  .left{
+    width:100%;border-right:none;
+    border-bottom:1px solid #eef0f5;
+    padding:24px 20px;gap:12px;
+  }
+  .avatar{width:48px;height:48px;font-size:20px;margin-bottom:0}
+  .meeting-title{font-size:18px}
+  .meta-list{flex-direction:row;flex-wrap:wrap;gap:8px}
+  .meta-row{font-size:12px}
+  .meta-icon{width:24px;height:24px;font-size:12px}
+  .left p{display:none}
+  .left-footer{margin-top:4px}
+
+  .right{padding:24px 20px;flex:1}
+
+  /* Calendar: smaller cells */
+  .cal-month{font-size:16px}
+  .cal-head{font-size:10px;padding-bottom:8px}
+  .cal-grid{gap:2px}
+  .cal-cell{border-radius:8px;font-size:13px}
+
+  /* Times: 3 columns on mobile too */
+  .times-grid{grid-template-columns:repeat(3,1fr);gap:8px}
+  .time-pill{padding:10px 4px;font-size:13px;border-radius:9px}
+
+  /* Form */
+  .fields{grid-template-columns:1fr}
+  .field.full{grid-column:1}
+  .btn-book{padding:14px;font-size:16px}
+
+  /* Back row */
+  .back-label{font-size:16px}
+
+  /* Success */
+  .ok-ring{width:72px;height:72px;font-size:32px}
+  .ok-title{font-size:20px}
+}
+
+@media(max-width:380px){
+  .times-grid{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- LEFT -->
+  <div class="left">
+    <div class="avatar">H</div>
+    <div class="host-name">hisfia · Equipo comercial</div>
+    <div class="meeting-title">Videollamada de descubrimiento</div>
+    <div class="meta-list">
+      <div class="meta-row"><div class="meta-icon">⏱</div>30 minutos</div>
+      <div class="meta-row"><div class="meta-icon">🎥</div>Google Meet</div>
+      <div class="meta-row"><div class="meta-icon">🌍</div>Europe / Madrid</div>
+    </div>
+    <div class="divider"></div>
+    <p style="font-size:13.5px;color:#64748b;line-height:1.65">
+      Cuéntanos tu situación. Analizamos si podemos ayudarte a automatizar tu proceso comercial con IA y te mostramos resultados reales en 30 min.
+    </p>
+    <div class="left-footer" style="margin-top:28px">
+      <div class="dot-live"></div>Disponibilidad en tiempo real
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+
+    <!-- STEP 1: Calendar -->
+    <div class="step active" id="step-cal">
+      <div class="cal-top">
+        <div>
+          <div class="step-label">Selecciona un día</div>
+          <div class="cal-month" id="cal-label">…</div>
+        </div>
+        <div class="cal-arrows">
+          <button class="arr-btn" id="btn-prev">&#8249;</button>
+          <button class="arr-btn" id="btn-next">&#8250;</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid">
+        <!-- skeleton -->
+        <div class="cal-head">LUN</div><div class="cal-head">MAR</div><div class="cal-head">MIÉ</div>
+        <div class="cal-head">JUE</div><div class="cal-head">VIE</div><div class="cal-head">SÁB</div><div class="cal-head">DOM</div>
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Times -->
+    <div class="step" id="step-times">
+      <div class="back-row">
+        <button class="back-btn" id="back1">&#8249;</button>
+        <div>
+          <div class="back-label" id="times-label">–</div>
+          <div class="back-sub">Elige tu hora · Europe/Madrid</div>
+        </div>
+      </div>
+      <div class="times-grid" id="times-grid"></div>
+    </div>
+
+    <!-- STEP 3: Form -->
+    <div class="step" id="step-form">
+      <div class="back-row" style="margin-bottom:14px">
+        <button class="back-btn" id="back2">&#8249;</button>
+        <div>
+          <div class="back-label">Confirma tu reserva</div>
+          <div class="back-sub">Recibirás la invitación en tu email</div>
+        </div>
+      </div>
+      <div class="form-pill" id="pill">📅 <span id="pill-text">–</span></div>
+      <form id="bform" onsubmit="submitBook(event)">
+        <div class="fields">
+          <div class="field"><label>Nombre *</label><input id="fn" type="text" required placeholder="María García"/></div>
+          <div class="field"><label>Email *</label><input id="fe" type="email" required placeholder="maria@empresa.com"/></div>
+          <div class="field"><label>Empresa</label><input id="fc" type="text" placeholder="Mi Empresa S.L."/></div>
+          <div class="field"><label>Teléfono</label><input id="fp" type="tel" placeholder="+34 600 000 000"/></div>
+          <div class="field full"><label>¿En qué podemos ayudarte?</label><textarea id="fo" rows="2" placeholder="Cuéntanos brevemente…"></textarea></div>
+        </div>
+        <div class="err" id="ferr"></div>
+        <button class="btn-book" id="sbtn" type="submit">Confirmar reserva →</button>
+      </form>
+    </div>
+
+    <!-- STEP 4: Success -->
+    <div class="step" id="step-ok">
+      <div class="ok-ring">🎉</div>
+      <div class="ok-title">¡Reserva confirmada!</div>
+      <div class="ok-sub">Hemos enviado la invitación a tu email con el enlace de Google Meet. ¡Nos vemos pronto!</div>
+      <a class="meet-cta" id="meet-a" href="#" target="_blank" style="display:none">🎥 Unirse a Google Meet</a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const CALL_ID = new URLSearchParams(location.search).get('call_id')||'';
+const MONTHS  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DFULL   = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+
+let slotsByDate={}, availDates=new Set();
+let viewY=0, viewM=0;
+let selDate=null, selSlot=null;
+
+function show(id){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function fmtDate(ds){
+  const d=new Date(ds+'T12:00:00');
+  return `${DFULL[(d.getDay()+6)%7]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+}
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function init(){
+  const res=await fetch('/api/slots').catch(()=>null);
+  if(!res||!res.ok){renderError();return}
+  const data=await res.json();
+  if(!data.ok){renderError();return}
+
+  for(const s of data.slots){
+    if(!slotsByDate[s.date]) slotsByDate[s.date]=[];
+    slotsByDate[s.date].push(s);
+    availDates.add(s.date);
+  }
+  if(data.slots.length){
+    const f=new Date(data.slots[0].date+'T12:00:00');
+    viewY=f.getFullYear(); viewM=f.getMonth();
+  } else {
+    const n=new Date(); viewY=n.getFullYear(); viewM=n.getMonth();
+  }
+  renderCal();
+}
+
+function renderError(){
+  document.getElementById('cal-grid').innerHTML='<div style="grid-column:1/-1;padding:20px 0;font-size:14px;color:#ef4444">Sin disponibilidad en este momento. Inténtalo más tarde.</div>';
+  document.getElementById('cal-label').textContent='Sin disponibilidad';
+}
+
+// ── Calendar ─────────────────────────────────────────────────────────────────
+function renderCal(){
+  document.getElementById('cal-label').textContent=
+    `${MONTHS[viewM].charAt(0).toUpperCase()+MONTHS[viewM].slice(1)} ${viewY}`;
+
+  const g=document.getElementById('cal-grid');
+  g.innerHTML='';
+
+  // Day headers
+  ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'].forEach(d=>{
+    const el=document.createElement('div');
+    el.className='cal-head'; el.textContent=d; g.appendChild(el);
+  });
+
+  const firstDay=new Date(viewY,viewM,1);
+  const offset=(firstDay.getDay()+6)%7;
+  const total=new Date(viewY,viewM+1,0).getDate();
+  const todayMs=new Date(); todayMs.setHours(0,0,0,0);
+
+  for(let i=0;i<offset;i++){
+    const el=document.createElement('div'); el.className='cal-cell empty'; g.appendChild(el);
+  }
+  for(let d=1;d<=total;d++){
+    const ds=`${viewY}-${String(viewM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dt=new Date(viewY,viewM,d);
+    const isAvail=availDates.has(ds);
+    const isPast=dt<todayMs;
+    const isToday=dt.getTime()===todayMs.getTime();
+
+    const el=document.createElement('div');
+    el.className='cal-cell'+(isPast?' past':isAvail?' avail':'')+((isToday)?' today':'');
+    if(ds===selDate) el.classList.add('sel');
+    el.textContent=d;
+    if(isAvail&&!isPast) el.onclick=()=>pickDate(ds,el);
+    g.appendChild(el);
+  }
+
+  const now=new Date();
+  document.getElementById('btn-prev').disabled=viewY===now.getFullYear()&&viewM===now.getMonth();
+}
+
+document.getElementById('btn-prev').onclick=()=>{if(viewM===0){viewM=11;viewY--}else viewM--;renderCal()};
+document.getElementById('btn-next').onclick=()=>{if(viewM===11){viewM=0;viewY++}else viewM++;renderCal()};
+
+// ── Pick date ─────────────────────────────────────────────────────────────────
+function pickDate(ds,el){
+  selDate=ds;
+  document.querySelectorAll('.cal-cell.sel').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+
+  const g=document.getElementById('times-grid');
+  g.innerHTML='';
+  for(const s of (slotsByDate[ds]||[])){
+    const b=document.createElement('button');
+    b.type='button'; b.className='time-pill'; b.textContent=s.time;
+    b.onclick=()=>pickTime(b,s,ds);
+    g.appendChild(b);
+  }
+  document.getElementById('times-label').textContent=fmtDate(ds);
+  show('step-times');
+}
+
+document.getElementById('back1').onclick=()=>show('step-cal');
+
+// ── Pick time ─────────────────────────────────────────────────────────────────
+function pickTime(b,slot,ds){
+  document.querySelectorAll('.time-pill.sel').forEach(x=>x.classList.remove('sel'));
+  b.classList.add('sel');
+  selSlot=slot;
+  selSlot._label=`${fmtDate(ds)} · ${slot.time}`;
+  document.getElementById('pill-text').textContent=selSlot._label;
+  show('step-form');
+}
+
+document.getElementById('back2').onclick=()=>show('step-times');
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+async function submitBook(e){
+  e.preventDefault();
+  const btn=document.getElementById('sbtn');
+  const err=document.getElementById('ferr');
+  err.style.display='none';
+  btn.disabled=true; btn.textContent='Confirmando…';
+
+  try{
+    const r=await fetch('/api/confirm',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        slot_start:selSlot.start_iso, slot_end:selSlot.end_iso,
+        slot_label:selSlot._label,
+        name:document.getElementById('fn').value.trim(),
+        email:document.getElementById('fe').value.trim(),
+        company:document.getElementById('fc').value.trim(),
+        phone:document.getElementById('fp').value.trim(),
+        notes:document.getElementById('fo').value.trim(),
+        call_id:CALL_ID,
+      }),
+    });
+    const d=await r.json();
+    if(d.ok){
+      if(d.meet_url){const a=document.getElementById('meet-a');a.href=d.meet_url;a.style.display='inline-flex'}
+      show('step-ok');
+    } else {
+      err.textContent=d.message||'Error. Inténtalo de nuevo.';
+      err.style.display='block';
+      btn.disabled=false; btn.textContent='Confirmar reserva →';
+    }
+  }catch(ex){
+    err.textContent='Error de conexión. Inténtalo de nuevo.';
+    err.style.display='block';
+    btn.disabled=false; btn.textContent='Confirmar reserva →';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
