@@ -458,9 +458,20 @@ function fmtDate(ds){
 }
 
 // ── Load ──────────────────────────────────────────────────────────────────────
+async function fetchWithRetry(url, attempts=4, delayMs=1200){
+  for(let i=0;i<attempts;i++){
+    try{
+      const r=await fetch(url);
+      if(r.ok) return r;
+    }catch(e){}
+    if(i<attempts-1) await new Promise(r=>setTimeout(r,delayMs));
+  }
+  return null;
+}
+
 async function init(){
-  const res=await fetch('/api/slots').catch(()=>null);
-  if(!res||!res.ok){renderError();return}
+  const res=await fetchWithRetry('/api/slots');
+  if(!res){renderError();return}
   const data=await res.json();
   if(!data.ok){renderError();return}
 
@@ -473,7 +484,7 @@ async function init(){
     const f=new Date(data.slots[0].date+'T12:00:00');
     viewY=f.getFullYear(); viewM=f.getMonth();
   } else {
-    const n=new Date(); viewY=n.getFullYear(); viewM=n.getMonth();
+    renderNoSlots(); return;
   }
   renderCal();
 
@@ -494,8 +505,12 @@ async function init(){
 }
 
 function renderError(){
-  document.getElementById('cal-grid').innerHTML='<div style="grid-column:1/-1;padding:20px 0;font-size:14px;color:#ef4444">Sin disponibilidad en este momento. Inténtalo más tarde.</div>';
-  document.getElementById('cal-label').textContent='Sin disponibilidad';
+  document.getElementById('cal-grid').innerHTML='<div style="grid-column:1/-1;padding:24px 0;font-size:13px;color:#64748b;text-align:center;line-height:1.6">Hubo un problema cargando el calendario.<br><a href="#" onclick="location.reload();return false;" style="color:#6c8fff">Intentar de nuevo</a> o escríbenos directamente.</div>';
+  document.getElementById('cal-label').textContent='Error al cargar';
+}
+function renderNoSlots(){
+  document.getElementById('cal-grid').innerHTML='<div style="grid-column:1/-1;padding:24px 0;font-size:13px;color:#64748b;text-align:center;line-height:1.6">Agenda completa por ahora.<br>Escríbenos a <a href="mailto:hola@hisfia.com" style="color:#6c8fff">hola@hisfia.com</a> y te buscamos hueco.</div>';
+  document.getElementById('cal-label').textContent='Sin huecos disponibles';
 }
 
 // ── Calendar ─────────────────────────────────────────────────────────────────
