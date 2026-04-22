@@ -3,632 +3,960 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Reserva tu videollamada · hisfia</title>
+<title>Reserva tu videollamada · HisfIA</title>
+<link rel="icon" href="/logo-icon.jpeg" type="image/jpeg"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{height:100%}
-
+:root{
+  --cyan:#22d3ee;
+  --cyan-dark:#0891b2;
+  --cyan-light:rgba(34,211,238,.1);
+  --cyan-mid:rgba(34,211,238,.18);
+  --ink:#0f1117;
+  --ink2:#374151;
+  --ink3:#6b7280;
+  --ink4:#9ca3af;
+  --border:#e5e7eb;
+  --border2:#d1d5db;
+  --bg:#f7f8fa;
+  --white:#ffffff;
+}
 body{
-  min-height:100%;
-  background:#f0f2f7;
+  min-height:100vh;
+  background:var(--bg);
   font-family:'Inter',system-ui,sans-serif;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:32px 16px;
+  color:var(--ink);
 }
 
-/* ─── Card ─── */
-.card{
-  display:flex;
-  background:#fff;
-  border-radius:20px;
-  box-shadow:0 8px 48px rgba(0,0,0,.12), 0 1px 4px rgba(0,0,0,.06);
-  overflow:hidden;
-  width:100%;
-  max-width:860px;
-  min-height:580px;
+/* ── Background ─────────────────────────────────────────────────────────── */
+.bg{position:fixed;inset:0;z-index:0;background:#f0f4f8;overflow:hidden}
+#bg-canvas{position:absolute;inset:0;width:100%;height:100%}
+.bg-orb{
+  position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;
+  animation:orbFloat linear infinite;
+}
+.bg-orb1{width:620px;height:620px;background:rgba(34,211,238,.13);animation-duration:22s;top:-15%;left:-10%}
+.bg-orb2{width:480px;height:480px;background:rgba(8,145,178,.1); animation-duration:28s;bottom:-10%;right:-8%;animation-delay:-10s}
+.bg-orb3{width:360px;height:360px;background:rgba(34,211,238,.07);animation-duration:18s;top:40%;left:55%;animation-delay:-6s}
+@keyframes orbFloat{
+  0%  {transform:translate(0,0) scale(1)}
+  25% {transform:translate(40px,-30px) scale(1.05)}
+  50% {transform:translate(20px,50px) scale(.97)}
+  75% {transform:translate(-30px,20px) scale(1.03)}
+  100%{transform:translate(0,0) scale(1)}
 }
 
-/* ─── Left panel ─── */
-.left{
-  width:300px;
-  flex-shrink:0;
-  border-right:1px solid #eef0f5;
-  padding:40px 32px;
-  display:flex;
-  flex-direction:column;
-  gap:0;
+/* ── Page ────────────────────────────────────────────────────────────────── */
+.page{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:52px 20px 72px;
 }
-
-.avatar{
-  width:64px;height:64px;
-  border-radius:50%;
-  background:linear-gradient(135deg,#6c8fff,#a78bfa);
-  display:flex;align-items:center;justify-content:center;
-  font-size:26px;font-weight:800;color:#fff;
-  margin-bottom:20px;
-  box-shadow:0 4px 16px rgba(108,143,255,.35);
-}
-
-.host-name{font-size:13px;font-weight:600;color:#64748b;margin-bottom:4px}
-.meeting-title{font-size:22px;font-weight:700;color:#0f172a;line-height:1.25;margin-bottom:24px}
-
-.meta-list{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
-.meta-row{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#475569}
-.meta-icon{
-  width:28px;height:28px;flex-shrink:0;
-  background:#f1f5f9;border-radius:7px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;
-}
-
-.divider{height:1px;background:#eef0f5;margin:20px 0}
-
-.left-footer{
-  margin-top:auto;
-  font-size:11.5px;color:#94a3b8;
-  display:flex;align-items:center;gap:6px;
-}
-.dot-live{
-  width:7px;height:7px;border-radius:50%;
-  background:#22c55e;
-  box-shadow:0 0 0 2px rgba(34,197,94,.2);
-  flex-shrink:0;
-}
-
-/* ─── Right panel ─── */
-.right{
-  flex:1;
-  padding:40px 36px;
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-}
-
-/* Steps */
-.step{display:none;flex-direction:column;flex:1}
-.step.active{display:flex}
-
-/* ─── Calendar ─── */
-.cal-top{
-  display:flex;align-items:center;justify-content:space-between;
-  margin-bottom:28px;
-}
-.step-label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#94a3b8;margin-bottom:6px}
-.cal-month{font-size:18px;font-weight:700;color:#0f172a}
-
-.cal-arrows{display:flex;gap:6px}
-.arr-btn{
-  width:34px;height:34px;
-  border-radius:9px;
-  border:1.5px solid #e2e8f0;
-  background:#fff;
-  color:#64748b;
-  font-size:17px;
-  cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;
-}
-.arr-btn:hover{border-color:#6c8fff;color:#6c8fff;background:#f5f7ff}
-.arr-btn:disabled{opacity:.35;cursor:default}
-
-.cal-grid{
+.container{
+  width:100%;max-width:960px;
   display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:4px;
+  grid-template-columns:1fr 430px;
+  gap:52px;
+  align-items:start;
 }
-.cal-head{
-  text-align:center;
-  font-size:11px;font-weight:600;
-  color:#94a3b8;letter-spacing:.04em;
-  padding-bottom:12px;
-  text-transform:uppercase;
+
+/* ── Left ────────────────────────────────────────────────────────────────── */
+.left{padding-top:8px;display:flex;flex-direction:column;gap:36px}
+
+/* Logo: solo icono + texto CSS */
+.logo{display:flex;align-items:center;gap:11px}
+.logo-img{
+  width:40px;height:40px;border-radius:10px;
+  background:#fff;
+  box-shadow:0 0 0 1px rgba(0,0,0,.08), 0 2px 10px rgba(34,211,238,.2);
+  overflow:hidden;
 }
-.cal-cell{
-  aspect-ratio:1;
+.logo-img img{width:100%;height:100%;object-fit:cover}
+.logo-text{
+  font-size:20px;font-weight:800;letter-spacing:-.04em;color:var(--ink);
+}
+.logo-text span{color:var(--cyan-dark)}
+
+.hero h1{
+  font-size:clamp(30px,3.8vw,44px);
+  font-weight:800;line-height:1.1;
+  letter-spacing:-.025em;
+  color:var(--ink);margin-bottom:16px;
+}
+.hero h1 em{
+  font-style:normal;
+  position:relative;white-space:nowrap;
+}
+.hero h1 em::after{
+  content:'';
+  position:absolute;left:0;bottom:-3px;width:100%;height:3px;
+  background:linear-gradient(90deg,var(--cyan),var(--cyan-dark));
+  border-radius:2px;
+}
+.hero p{font-size:15.5px;color:var(--ink3);line-height:1.7;max-width:360px}
+
+/* Info cards */
+.cards{display:flex;flex-direction:column;gap:10px}
+.icard{
+  display:flex;align-items:center;gap:14px;
+  background:var(--white);border:1px solid var(--border);
+  border-radius:13px;padding:14px 16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  transition:box-shadow .15s;
+}
+.icard:hover{box-shadow:0 3px 12px rgba(34,211,238,.15)}
+.icard-icon{
+  width:44px;height:38px;border-radius:9px;flex-shrink:0;
+  background:var(--cyan-light);border:1px solid rgba(34,211,238,.2);
   display:flex;align-items:center;justify-content:center;
-  border-radius:10px;
-  font-size:14px;font-weight:500;
-  color:#0f172a;
-  transition:all .12s;
-  cursor:default;
-  position:relative;
+  font-size:10px;font-weight:700;letter-spacing:.02em;color:var(--cyan-dark);
 }
-.cal-cell.empty,.cal-cell.past{color:#cbd5e1;cursor:default}
+.icard-title{font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:1px}
+.icard-sub{font-size:12px;color:var(--ink3)}
+
+/* Trust */
+.trust{display:flex;flex-wrap:wrap;gap:8px 20px}
+.trust-item{
+  display:flex;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:500;color:var(--ink3);
+}
+.trust-item svg{color:var(--cyan-dark);flex-shrink:0}
+
+/* ── Booking card ────────────────────────────────────────────────────────── */
+.bcard{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 4px 24px rgba(0,0,0,.07),0 1px 3px rgba(0,0,0,.04);
+}
+
+/* Progress */
+.prog{display:flex;border-bottom:1px solid var(--border)}
+.ps{
+  flex:1;padding:14px 0 11px;
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  position:relative;transition:background .15s;
+  cursor:default;
+}
+.ps::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;
+  background:transparent;transition:background .2s;
+}
+.ps.active::after{background:var(--cyan)}
+.ps.done::after{background:var(--cyan-dark)}
+.ps-n{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;
+  background:#f3f4f6;color:var(--ink4);
+  border:1.5px solid var(--border2);transition:all .2s;
+}
+.ps.active .ps-n{background:var(--cyan-light);border-color:var(--cyan);color:var(--cyan-dark)}
+.ps.done .ps-n{background:rgba(34,211,238,.15);border-color:var(--cyan);color:var(--cyan-dark)}
+.ps-l{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--ink4)}
+.ps.active .ps-l{color:var(--cyan-dark)}
+.ps.done .ps-l{color:var(--cyan-dark)}
+
+/* Body */
+.cbody{padding:22px 24px}
+.sec{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:13px}
+
+/* Calendar */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-month{font-size:14.5px;font-weight:700;color:var(--ink)}
+.cal-arrows{display:flex;gap:4px}
+.arr{
+  width:28px;height:28px;border-radius:7px;
+  border:1.5px solid var(--border2);background:#fff;
+  color:var(--ink3);font-size:16px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:all .12s;
+}
+.arr:hover{border-color:var(--cyan);color:var(--cyan-dark);background:var(--cyan-light)}
+.arr:disabled{opacity:.3;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-hd{text-align:center;font-size:11px;font-weight:600;color:var(--ink4);padding-bottom:7px}
+.cal-cell{
+  aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;font-size:13px;font-weight:500;cursor:default;
+  transition:all .12s;color:#d1d5db;
+}
 .cal-cell.avail{
-  color:#6c8fff;
-  font-weight:600;
-  cursor:pointer;
+  color:var(--ink);font-weight:700;cursor:pointer;
+  background:var(--cyan-light);border:1.5px solid rgba(34,211,238,.25);
 }
 .cal-cell.avail:hover{
-  background:#eff3ff;
-  transform:scale(1.08);
+  background:var(--cyan-mid);border-color:var(--cyan);
+  transform:scale(1.08);box-shadow:0 2px 8px rgba(34,211,238,.25);
 }
-.cal-cell.avail.sel{
-  background:#6c8fff;
-  color:#fff;
-  box-shadow:0 4px 14px rgba(108,143,255,.4);
-  transform:scale(1.08);
+.cal-cell.sel{
+  background:var(--ink) !important;border-color:var(--ink) !important;
+  color:#fff !important;font-weight:700;
+  box-shadow:0 2px 10px rgba(15,17,23,.25);transform:scale(1.08);
 }
-.cal-cell.today::after{
+/* Día completo */
+.cal-cell.full{
+  cursor:not-allowed;
+  background:rgba(239,68,68,.05);
+  border:1.5px solid rgba(239,68,68,.2);
+  color:#fca5a5;
+  position:relative;
+}
+.cal-cell.full .cal-num{color:#ef4444;font-weight:600}
+.cal-cell.full .cal-tag{
+  display:block;
+  font-size:6.5px;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;color:#ef4444;opacity:.9;line-height:1;
+}
+/* Línea diagonal sobre el día completo */
+.cal-cell.full::before{
   content:'';
-  position:absolute;bottom:3px;
-  width:4px;height:4px;border-radius:50%;
-  background:#6c8fff;
+  position:absolute;inset:4px;
+  background:linear-gradient(
+    135deg,
+    transparent calc(50% - 0.5px),
+    rgba(239,68,68,.25) calc(50% - 0.5px),
+    rgba(239,68,68,.25) calc(50% + 0.5px),
+    transparent calc(50% + 0.5px)
+  );
+  border-radius:4px;
+  pointer-events:none;
 }
-.cal-cell.avail.sel.today::after{background:#fff}
+.cal-cell.today{
+  outline:2px solid var(--cyan);
+  outline-offset:-2px;
+  color:var(--cyan-dark);
+  font-weight:700;
+}
+.cal-cell.today.avail{
+  background:var(--cyan-light);
+  outline:2px solid var(--cyan);
+}
+.cal-cell.sel.today{outline:2px solid var(--cyan);outline-offset:-2px}
 
-/* ─── Times ─── */
-.back-row{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:24px;
+/* Times */
+.tw{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s ease,opacity .2s}
+.tw.open{max-height:500px;opacity:1}
+.tw-label{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px}
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.tp{
+  padding:9px 4px;border-radius:8px;
+  border:1.5px solid var(--border2);background:#fff;
+  color:var(--ink);font-size:13px;font-weight:600;
+  text-align:center;cursor:pointer;font-family:inherit;transition:all .12s;
 }
-.back-btn{
-  width:34px;height:34px;
-  border-radius:9px;border:1.5px solid #e2e8f0;
-  background:#fff;color:#64748b;
-  font-size:17px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  transition:all .15s;flex-shrink:0;
-}
-.back-btn:hover{border-color:#6c8fff;color:#6c8fff;background:#f5f7ff}
-.back-label{font-size:18px;font-weight:700;color:#0f172a}
-.back-sub{font-size:12.5px;color:#94a3b8;margin-top:2px}
-
-.times-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-  overflow-y:auto;
-}
-.time-pill{
-  padding:11px 6px;
-  border-radius:11px;
-  border:1.5px solid #e2e8f0;
-  background:#fff;
-  color:#0f172a;
-  font-size:14px;font-weight:500;
-  text-align:center;
-  cursor:pointer;
-  font-family:inherit;
-  transition:all .13s;
-}
-.time-pill:hover{border-color:#6c8fff;color:#6c8fff;background:#f5f7ff}
-.time-pill.sel{
-  border-color:#6c8fff;
-  background:#6c8fff;
-  color:#fff;
-  font-weight:600;
-  box-shadow:0 4px 12px rgba(108,143,255,.3);
+.tp:hover{border-color:var(--cyan);color:var(--cyan-dark);background:var(--cyan-light)}
+.tp.sel{
+  background:var(--ink);border-color:var(--ink);color:#fff;
+  box-shadow:0 2px 8px rgba(15,17,23,.2);
 }
 
-/* ─── Form ─── */
-.form-pill{
+/* Divider */
+.div{height:1px;background:var(--border);margin:18px 0}
+
+/* Form */
+.fw{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .25s}
+.fw.open{max-height:700px;opacity:1}
+.sel-pill{
   display:inline-flex;align-items:center;gap:7px;
-  background:#f1f5f9;
+  background:var(--cyan-light);border:1px solid rgba(34,211,238,.3);
   border-radius:20px;padding:6px 14px;
-  font-size:13px;color:#475569;font-weight:500;
-  margin-bottom:18px;
+  font-size:12.5px;color:var(--cyan-dark);font-weight:500;margin-bottom:16px;
 }
-.form-pill span{color:#6c8fff;font-weight:600}
-
-.fields{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.field{display:flex;flex-direction:column;gap:5px}
-.field.full{grid-column:1/-1}
-.field label{font-size:11px;font-weight:600;color:#94a3b8;letter-spacing:.06em;text-transform:uppercase}
-.field input,.field textarea{
-  padding:10px 14px;
-  border-radius:9px;
-  border:1.5px solid #e2e8f0;
-  color:#0f172a;
-  font-size:14px;font-family:inherit;
-  outline:none;resize:none;
-  transition:border-color .15s;
-  background:#fff;
+.sel-pill strong{color:var(--ink)}
+.field{margin-bottom:12px}
+.field label{
+  display:block;font-size:10.5px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink4);margin-bottom:5px;
 }
-.field input:focus,.field textarea:focus{border-color:#6c8fff;box-shadow:0 0 0 3px rgba(108,143,255,.1)}
-.field input::placeholder,.field textarea::placeholder{color:#cbd5e1}
-
-.btn-book{
-  width:100%;
-  margin-top:20px;
-  padding:13px;
-  border-radius:11px;border:none;
-  background:linear-gradient(135deg,#6c8fff,#a78bfa);
-  color:#fff;font-size:15px;font-weight:600;
-  cursor:pointer;font-family:inherit;
-  box-shadow:0 4px 18px rgba(108,143,255,.35);
-  transition:opacity .15s,transform .12s;
+.field input{
+  width:100%;padding:10px 13px;border-radius:9px;
+  border:1.5px solid var(--border2);
+  font-size:14px;font-family:inherit;color:var(--ink);
+  background:#fff;outline:none;transition:border-color .12s,box-shadow .12s;
 }
-.btn-book:hover{opacity:.9;transform:translateY(-1px)}
-.btn-book:active{transform:translateY(0)}
-.btn-book:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
-
+.field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(34,211,238,.12)}
+.field input::placeholder{color:var(--ink4)}
+.field input.valid{border-color:#10b981;background:rgba(16,185,129,.03)}
+.field input.invalid{border-color:#ef4444;background:rgba(239,68,68,.03)}
+.field-err{
+  display:none;font-size:11.5px;color:#dc2626;margin-top:4px;font-weight:500;
+}
+.field-err.show{display:block}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .err{
-  display:none;
-  margin-top:12px;padding:10px 14px;
-  border-radius:9px;
-  background:#fef2f2;border:1px solid #fecaca;
-  font-size:13px;color:#ef4444;
+  display:none;margin-top:8px;padding:10px 13px;border-radius:9px;
+  background:#fef2f2;border:1px solid #fecaca;font-size:13px;color:#dc2626;
+}
+.btn{
+  width:100%;margin-top:6px;padding:14px;border-radius:11px;border:none;
+  background:var(--ink);
+  color:#fff;font-size:15px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+  transition:opacity .12s,transform .1s,box-shadow .12s;
+  box-shadow:0 4px 16px rgba(15,17,23,.2);
+  letter-spacing:-.01em;
+  position:relative;overflow:hidden;
+}
+.btn::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 60%,rgba(34,211,238,.15));
+  pointer-events:none;
+}
+.btn:hover{opacity:.88;transform:translateY(-1px);box-shadow:0 6px 22px rgba(15,17,23,.3)}
+.btn:active{transform:none}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-note{
+  margin-top:10px;text-align:center;
+  font-size:11.5px;color:var(--ink4);
+  display:flex;align-items:center;justify-content:center;gap:5px;
 }
 
-/* ─── Success ─── */
-#step-ok{align-items:center;justify-content:center;text-align:center;gap:14px}
+/* ── Success ─────────────────────────────────────────────────────────────── */
+#step-ok{
+  display:none;padding:44px 28px 52px;
+  flex-direction:column;align-items:center;text-align:center;gap:16px;
+}
+#step-ok.active{display:flex}
 .ok-ring{
-  width:88px;height:88px;border-radius:50%;
-  background:linear-gradient(135deg,#6c8fff,#a78bfa);
-  display:flex;align-items:center;justify-content:center;
-  font-size:40px;
-  box-shadow:0 8px 28px rgba(108,143,255,.4);
+  width:76px;height:76px;border-radius:50%;
+  background:var(--cyan-light);border:2px solid rgba(34,211,238,.4);
+  display:flex;align-items:center;justify-content:center;font-size:30px;
   animation:pop .45s cubic-bezier(.34,1.56,.64,1) both;
+  box-shadow:0 0 30px rgba(34,211,238,.2);
 }
 @keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
-.ok-title{font-size:24px;font-weight:700;color:#0f172a}
-.ok-sub{font-size:14px;color:#64748b;line-height:1.7;max-width:300px}
-.meet-cta{
+.ok-title{font-size:22px;font-weight:800;color:var(--ink)}
+.ok-sub{font-size:14px;color:var(--ink3);line-height:1.65;max-width:290px}
+
+/* Cita destacada */
+.ok-appt{
+  background:var(--ink);border-radius:14px;
+  padding:18px 22px;width:100%;
+  display:flex;flex-direction:column;gap:10px;
+}
+.ok-appt-row{
+  display:flex;align-items:center;gap:12px;
+  font-size:14px;font-weight:500;color:rgba(255,255,255,.75);
+}
+.ok-appt-icon{
+  font-size:9.5px;font-weight:700;letter-spacing:.04em;
+  color:var(--cyan);min-width:32px;text-align:center;
+  background:rgba(34,211,238,.1);border-radius:5px;padding:3px 5px;
+}
+.ok-appt-row strong{color:#fff;font-weight:700}
+.ok-appt-divider{height:1px;background:rgba(255,255,255,.1)}
+
+.ok-note{
+  font-size:12px;color:var(--ink4);
+  display:flex;align-items:center;gap:5px;
+}
+.btn-meet{
   display:inline-flex;align-items:center;gap:8px;
   padding:12px 26px;border-radius:11px;
-  background:#6c8fff;color:#fff;
-  font-size:14px;font-weight:600;
-  text-decoration:none;
-  box-shadow:0 4px 14px rgba(108,143,255,.35);
-  transition:opacity .15s;
+  background:var(--ink);color:#fff;
+  font-size:14px;font-weight:700;text-decoration:none;
+  box-shadow:0 4px 14px rgba(15,17,23,.2);transition:opacity .12s;
+  position:relative;overflow:hidden;
 }
-.meet-cta:hover{opacity:.88}
-
-/* ─── Skeleton ─── */
-.skel{
-  height:36px;border-radius:9px;
-  background:linear-gradient(90deg,#f1f5f9 25%,#e8ecf5 50%,#f1f5f9 75%);
-  background-size:200% 100%;
-  animation:shimmer 1.4s infinite;
+.btn-meet::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 60%,rgba(34,211,238,.18));
+  pointer-events:none;
 }
-@keyframes shimmer{to{background-position:-200% 0}}
+.btn-meet:hover{opacity:.85}
 
-/* ─── Responsive ─── */
-@media(max-width:660px){
-  body{padding:0;align-items:flex-start}
-  .card{
-    flex-direction:column;min-height:100svh;
-    border-radius:0;box-shadow:none;
-    border:none;
-  }
-  .left{
-    width:100%;border-right:none;
-    border-bottom:1px solid #eef0f5;
-    padding:24px 20px;gap:12px;
-  }
-  .avatar{width:48px;height:48px;font-size:20px;margin-bottom:0}
-  .meeting-title{font-size:18px}
-  .meta-list{flex-direction:row;flex-wrap:wrap;gap:8px}
-  .meta-row{font-size:12px}
-  .meta-icon{width:24px;height:24px;font-size:12px}
-  .left p{display:none}
-  .left-footer{margin-top:4px}
+/* Skeleton */
+.sk{
+  height:32px;border-radius:8px;
+  background:linear-gradient(90deg,#f3f4f6 25%,#e9eaec 50%,#f3f4f6 75%);
+  background-size:200% 100%;animation:sh 1.4s infinite;
+}
+@keyframes sh{to{background-position:-200% 0}}
 
-  .right{padding:24px 20px;flex:1}
-
-  /* Calendar: smaller cells */
-  .cal-month{font-size:16px}
-  .cal-head{font-size:10px;padding-bottom:8px}
-  .cal-grid{gap:2px}
-  .cal-cell{border-radius:8px;font-size:13px}
-
-  /* Times: 3 columns on mobile too */
-  .times-grid{grid-template-columns:repeat(3,1fr);gap:8px}
-  .time-pill{padding:10px 4px;font-size:13px;border-radius:9px}
-
-  /* Form */
-  .fields{grid-template-columns:1fr}
-  .field.full{grid-column:1}
-  .btn-book{padding:14px;font-size:16px}
-
-  /* Back row */
-  .back-label{font-size:16px}
-
-  /* Success */
-  .ok-ring{width:72px;height:72px;font-size:32px}
-  .ok-title{font-size:20px}
+/* Loading overlay */
+.bcard{position:relative}
+.bcard-loader{
+  position:absolute;inset:0;z-index:10;
+  border-radius:20px;
+  background:rgba(255,255,255,.6);
+  backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity .35s;pointer-events:none;
+}
+.bcard-loader.hide{opacity:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-ring{
+  width:34px;height:34px;border-radius:50%;
+  border:3px solid rgba(34,211,238,.2);
+  border-top-color:var(--cyan);
+  animation:spin .75s linear infinite;
 }
 
-@media(max-width:380px){
-  .times-grid{grid-template-columns:repeat(2,1fr)}
+/* Fade-in on page enter */
+.page{animation:fadeUp .55s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media(max-width:860px){
+  .container{grid-template-columns:1fr;gap:0}
+  .left{padding:0 0 28px}
+  .hero h1{font-size:28px}
+  .page{padding:32px 16px 56px}
+}
+@media(max-width:580px){
+  .cards{display:none}
+  .tg{grid-template-columns:repeat(3,1fr)}
+  .r2{grid-template-columns:1fr}
+  .cbody{padding:18px}
+  #step-ok{padding:32px 18px 44px}
 }
 </style>
 </head>
 <body>
-<div class="card">
 
-  <!-- LEFT -->
+<div class="bg">
+  <canvas id="bg-canvas"></canvas>
+  <div class="bg-orb bg-orb1"></div>
+  <div class="bg-orb bg-orb2"></div>
+  <div class="bg-orb bg-orb3"></div>
+</div>
+
+<div class="page">
+<div class="container">
+
+  <!-- ── Left ── -->
   <div class="left">
-    <div class="avatar">H</div>
-    <div class="host-name">hisfia · Equipo comercial</div>
-    <div class="meeting-title">Videollamada de descubrimiento</div>
-    <div class="meta-list">
-      <div class="meta-row"><div class="meta-icon">⏱</div>30 minutos</div>
-      <div class="meta-row"><div class="meta-icon">🎥</div>Google Meet</div>
-      <div class="meta-row"><div class="meta-icon">🌍</div>Europe / Madrid</div>
+
+    <div class="logo">
+      <div class="logo-img"><img src="/logo-icon.jpeg" alt="HisfIA"/></div>
+      <div class="logo-text">Hisf<span>IA</span></div>
     </div>
-    <div class="divider"></div>
-    <p style="font-size:13.5px;color:#64748b;line-height:1.65">
-      Cuéntanos tu situación. Analizamos si podemos ayudarte a automatizar tu proceso comercial con IA y te mostramos resultados reales en 30 min.
-    </p>
-    <div class="left-footer" style="margin-top:28px">
-      <div class="dot-live"></div>Disponibilidad en tiempo real
+
+    <div class="hero">
+      <h1>Reserva tu<br/><em>videollamada</em><br/>con el equipo</h1>
+      <p>Descubre cómo las <strong style="color:var(--cyan-dark);font-weight:600">oficinas virtuales</strong> de HisfIA pueden transformar la forma de trabajar de tu empresa. Elige hueco y te enviamos el enlace de Google Meet al instante.</p>
     </div>
+
+    <div class="cards">
+      <div class="icard">
+        <div class="icard-icon">30'</div>
+        <div>
+          <div class="icard-title">30 minutos</div>
+          <div class="icard-sub">Reunión directa y sin rodeos</div>
+        </div>
+      </div>
+      <div class="icard">
+        <div class="icard-icon">Meet</div>
+        <div>
+          <div class="icard-title">Google Meet</div>
+          <div class="icard-sub">Enlace en tu email al confirmar</div>
+        </div>
+      </div>
+      <div class="icard">
+        <div class="icard-icon">VO</div>
+        <div>
+          <div class="icard-title">Oficinas virtuales</div>
+          <div class="icard-sub">Espacios de trabajo digitales para tu equipo</div>
+        </div>
+      </div>
+      <div class="icard">
+        <div class="icard-icon">Libre</div>
+        <div>
+          <div class="icard-title">Cancelación libre</div>
+          <div class="icard-sub">Sin compromiso, reagenda cuando quieras</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="trust">
+      <div class="trust-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Datos seguros
+      </div>
+      <div class="trust-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Sin compromiso
+      </div>
+      <div class="trust-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.12 1.18 2 2 0 012.1.02h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.29 6.29l.91-.91a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        Confirmación inmediata
+      </div>
+    </div>
+
   </div>
 
-  <!-- RIGHT -->
-  <div class="right">
+  <!-- ── Booking card ── -->
+  <div class="bcard" id="bcard">
+    <div class="bcard-loader" id="bcard-loader"><div class="loader-ring"></div></div>
 
-    <!-- STEP 1: Calendar -->
-    <div class="step active" id="step-cal">
-      <div class="cal-top">
-        <div>
-          <div class="step-label">Selecciona un día</div>
-          <div class="cal-month" id="cal-label">…</div>
-        </div>
+    <!-- Progress -->
+    <div class="prog">
+      <div class="ps active" id="step-ind-1"><div class="ps-n">1</div><div class="ps-l">Fecha</div></div>
+      <div class="ps" id="step-ind-2"><div class="ps-n">2</div><div class="ps-l">Hora</div></div>
+      <div class="ps" id="step-ind-3"><div class="ps-n">3</div><div class="ps-l">Confirmar</div></div>
+    </div>
+
+    <!-- Flow -->
+    <div class="cbody" id="booking-body">
+
+      <div class="sec">Elige un día</div>
+      <div class="cal-nav">
+        <div class="cal-month" id="cal-month">…</div>
         <div class="cal-arrows">
-          <button class="arr-btn" id="btn-prev">&#8249;</button>
-          <button class="arr-btn" id="btn-next">&#8250;</button>
+          <button class="arr" id="btn-prev">&#8249;</button>
+          <button class="arr" id="btn-next">&#8250;</button>
         </div>
       </div>
       <div class="cal-grid" id="cal-grid">
-        <!-- skeleton -->
-        <div class="cal-head">LUN</div><div class="cal-head">MAR</div><div class="cal-head">MIÉ</div>
-        <div class="cal-head">JUE</div><div class="cal-head">VIE</div><div class="cal-head">SÁB</div><div class="cal-head">DOM</div>
-        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
-        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
-        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
-        <div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div><div class="skel"></div>
+        <div class="cal-hd">L</div><div class="cal-hd">M</div><div class="cal-hd">X</div>
+        <div class="cal-hd">J</div><div class="cal-hd">V</div><div class="cal-hd">S</div><div class="cal-hd">D</div>
+        <div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div>
+        <div class="sk"></div><div class="sk"></div><div class="sk"></div>
       </div>
+
+      <div class="tw" id="times-wrap">
+        <div class="div"></div>
+        <div class="sec">Elige una hora</div>
+        <div class="tw-label" id="times-label"></div>
+        <div class="tg" id="times-grid"></div>
+      </div>
+
+      <div class="fw" id="form-wrap">
+        <div class="div"></div>
+        <div class="sec">Tus datos</div>
+        <div class="sel-pill"><strong id="pill-text">–</strong></div>
+        <form onsubmit="submitBook(event)">
+          <div class="r2">
+            <div class="field">
+              <label>Nombre *</label>
+              <input id="fn" type="text" required placeholder="María García" autocomplete="given-name"/>
+              <div class="field-err" id="fn-err"></div>
+            </div>
+            <div class="field">
+              <label>Email *</label>
+              <input id="fe" type="email" required placeholder="maria@empresa.com" autocomplete="email"/>
+              <div class="field-err" id="fe-err"></div>
+            </div>
+          </div>
+          <div class="r2">
+            <div class="field">
+              <label>Empresa</label>
+              <input id="fc" type="text" placeholder="Mi Empresa S.L." autocomplete="organization"/>
+            </div>
+            <div class="field">
+              <label>Teléfono</label>
+              <input id="fp" type="tel" placeholder="+34 600 123 456" autocomplete="tel"/>
+              <div class="field-err" id="fp-err"></div>
+            </div>
+          </div>
+          <div class="err" id="ferr"></div>
+          <button class="btn" id="sbtn" type="submit">Confirmar reserva →</button>
+          <div class="btn-note">Tus datos son privados. Sin spam.</div>
+        </form>
+      </div>
+
     </div>
 
-    <!-- STEP 2: Times -->
-    <div class="step" id="step-times">
-      <div class="back-row">
-        <button class="back-btn" id="back1">&#8249;</button>
-        <div>
-          <div class="back-label" id="times-label">–</div>
-          <div class="back-sub">Elige tu hora · Europe/Madrid</div>
-        </div>
-      </div>
-      <div class="times-grid" id="times-grid"></div>
-    </div>
+    <!-- Success -->
+    <div id="step-ok">
+      <div class="ok-ring">✓</div>
+      <div class="ok-title">Reserva confirmada</div>
+      <div class="ok-sub">Te hemos enviado la invitación a tu email. ¡Nos vemos pronto!</div>
 
-    <!-- STEP 3: Form -->
-    <div class="step" id="step-form">
-      <div class="back-row" style="margin-bottom:14px">
-        <button class="back-btn" id="back2">&#8249;</button>
-        <div>
-          <div class="back-label">Confirma tu reserva</div>
-          <div class="back-sub">Recibirás la invitación en tu email</div>
-        </div>
+      <div class="ok-appt">
+        <div class="ok-appt-row"><div class="ok-appt-icon">Día</div><div><strong id="ok-date-val">—</strong></div></div>
+        <div class="ok-appt-divider"></div>
+        <div class="ok-appt-row"><div class="ok-appt-icon">Hora</div><div><strong id="ok-time-val">—</strong></div></div>
+        <div class="ok-appt-divider"></div>
+        <div class="ok-appt-row"><div class="ok-appt-icon">Meet</div><div>Google Meet · <strong>enlace en tu email</strong></div></div>
+        <div class="ok-appt-divider"></div>
+        <div class="ok-appt-row"><div class="ok-appt-icon">30'</div><div>Duración: <strong>30 minutos</strong></div></div>
       </div>
-      <div class="form-pill" id="pill">📅 <span id="pill-text">–</span></div>
-      <form id="bform" onsubmit="submitBook(event)">
-        <div class="fields">
-          <div class="field"><label>Nombre *</label><input id="fn" type="text" required placeholder="María García"/></div>
-          <div class="field"><label>Email *</label><input id="fe" type="email" required placeholder="maria@empresa.com"/></div>
-          <div class="field"><label>Empresa</label><input id="fc" type="text" placeholder="Mi Empresa S.L."/></div>
-          <div class="field"><label>Teléfono</label><input id="fp" type="tel" placeholder="+34 600 000 000"/></div>
-          <div class="field full"><label>¿En qué podemos ayudarte?</label><textarea id="fo" rows="2" placeholder="Cuéntanos brevemente…"></textarea></div>
-        </div>
-        <div class="err" id="ferr"></div>
-        <button class="btn-book" id="sbtn" type="submit">Confirmar reserva →</button>
-      </form>
-    </div>
 
-    <!-- STEP 4: Success -->
-    <div class="step" id="step-ok">
-      <div class="ok-ring">🎉</div>
-      <div class="ok-title">¡Reserva confirmada!</div>
-      <div class="ok-sub">Hemos enviado la invitación a tu email con el enlace de Google Meet. ¡Nos vemos pronto!</div>
-      <a class="meet-cta" id="meet-a" href="#" target="_blank" style="display:none">🎥 Unirse a Google Meet</a>
+      <div class="ok-note">Revisa tu bandeja de entrada (y el spam, por si acaso)</div>
+      <a class="btn-meet" id="meet-a" href="#" target="_blank" style="display:none">Unirse a la reunión</a>
     </div>
 
   </div>
+
+</div>
 </div>
 
 <script>
-const _p      = new URLSearchParams(location.search);
-const CALL_ID  = _p.get('call_id')||'';
-const PRE_DATE = _p.get('date')||'';
-const PRE_TIME = _p.get('time')||'';
-const PRE_NOMBRE  = _p.get('nombre')||'';
-const PRE_EMAIL   = _p.get('email')||'';
-const PRE_EMPRESA = _p.get('empresa')||'';
-const MONTHS  = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
-const DFULL   = ['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+const _p=new URLSearchParams(location.search);
+const CALL_ID=_p.get('call_id')||'';
+const PRE_DATE=_p.get('date')||'';
+const PRE_TIME=_p.get('time')||'';
+const PRE_NAME=_p.get('nombre')||'';
+const PRE_EMAIL=_p.get('email')||'';
+const PRE_EMPRESA=_p.get('empresa')||'';
 
-let slotsByDate={}, availDates=new Set();
-let viewY=0, viewM=0;
-let selDate=null, selSlot=null;
+const MOS=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const DIAS=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'];
+let byDate={},avail=new Set(),full=new Set(),viewY=0,viewM=0,selDate=null,selSlot=null;
+let slotRangeStart=null,slotRangeEnd=null;
 
-function show(id){
-  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function fmtDate(ds){
+function fmt(ds){
   const d=new Date(ds+'T12:00:00');
-  return `${DFULL[(d.getDay()+6)%7]} ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+  return `${DIAS[(d.getDay()+6)%7]} ${d.getDate()} de ${MOS[d.getMonth()]}`;
 }
-
-// ── Load ──────────────────────────────────────────────────────────────────────
-async function fetchWithRetry(url, attempts=4, delayMs=1200){
-  for(let i=0;i<attempts;i++){
-    try{
-      const r=await fetch(url);
-      if(r.ok) return r;
-    }catch(e){}
-    if(i<attempts-1) await new Promise(r=>setTimeout(r,delayMs));
+function setStep(n){
+  for(let i=1;i<=3;i++){
+    const el=document.getElementById('step-ind-'+i);
+    if(!el)continue;
+    el.className='ps'+(i===n?' active':i<n?' done':'');
+    el.querySelector('.ps-n').textContent=i<n?'✓':String(i);
+  }
+}
+async function fetchWithRetry(url,n=4,ms=1200){
+  for(let i=0;i<n;i++){
+    try{const r=await fetch(url);if(r.ok)return r;}catch(e){}
+    if(i<n-1)await new Promise(r=>setTimeout(r,ms));
   }
   return null;
 }
+function _hideLoader(){
+  const loader = document.getElementById('bcard-loader');
+  if(!loader) return;
+  loader.classList.add('hide');
+  setTimeout(()=>{ if(loader.parentNode) loader.parentNode.removeChild(loader); }, 350);
+}
 
 async function init(){
-  const res=await fetchWithRetry('/api/slots');
-  if(!res){renderError();return}
-  const data=await res.json();
-  if(!data.ok){renderError();return}
-
-  for(const s of data.slots){
-    if(!slotsByDate[s.date]) slotsByDate[s.date]=[];
-    slotsByDate[s.date].push(s);
-    availDates.add(s.date);
+  const r=await fetchWithRetry('/api/slots');
+  if(!r){_hideLoader();showErr('No se pudo cargar el calendario. <a href="javascript:location.reload()" style="color:#0891b2">Reintentar</a>');return}
+  const d=await r.json();
+  if(!d.ok){_hideLoader();showErr(d.error||'Error cargando disponibilidad');return}
+  if(!d.slots.length){_hideLoader();showErr('Agenda completa por ahora. Escríbenos a <a href="mailto:gestioneshisfia@gmail.com" style="color:#0891b2">gestioneshisfia@gmail.com</a>');return}
+  for(const s of d.slots){
+    if(!byDate[s.date])byDate[s.date]=[];
+    byDate[s.date].push(s);
+    avail.add(s.date);
   }
-  if(data.slots.length){
-    const f=new Date(data.slots[0].date+'T12:00:00');
-    viewY=f.getFullYear(); viewM=f.getMonth();
-  } else {
-    renderNoSlots(); return;
-  }
-  renderCal();
 
-  // Auto-seleccionar slot si viene desde link directo del email
-  if (PRE_DATE && PRE_TIME && slotsByDate[PRE_DATE]) {
-    const slot = slotsByDate[PRE_DATE].find(s => s.time === PRE_TIME);
-    if (slot) {
-      selDate = PRE_DATE;
-      selSlot = slot;
-      selSlot._label = `${fmtDate(PRE_DATE)} · ${slot.time}`;
-      document.getElementById('pill-text').textContent = selSlot._label;
-      if (PRE_NOMBRE)  document.getElementById('fn').value = PRE_NOMBRE;
-      if (PRE_EMAIL)   document.getElementById('fe').value = PRE_EMAIL;
-      if (PRE_EMPRESA) document.getElementById('fc').value = PRE_EMPRESA;
-      show('step-form');
+  // Calcular rango de días laborables cubiertos por la API
+  // y marcar como "completo" los que no tienen ningún hueco
+  const dates = d.slots.map(s=>s.date).sort();
+  slotRangeStart = new Date(dates[0]+'T12:00:00');
+  slotRangeEnd   = new Date(dates[dates.length-1]+'T12:00:00');
+  const todayMs  = new Date(); todayMs.setHours(0,0,0,0);
+  const cursor   = new Date(slotRangeStart);
+  while(cursor <= slotRangeEnd){
+    const dow = cursor.getDay();
+    if(dow !== 0 && dow !== 6){
+      const ds = cursor.toISOString().slice(0,10);
+      if(!avail.has(ds) && new Date(ds+'T12:00:00') >= todayMs) full.add(ds);
     }
+    cursor.setDate(cursor.getDate()+1);
   }
-}
 
-function renderError(){
-  document.getElementById('cal-grid').innerHTML='<div style="grid-column:1/-1;padding:24px 0;font-size:13px;color:#64748b;text-align:center;line-height:1.6">Hubo un problema cargando el calendario.<br><a href="#" onclick="location.reload();return false;" style="color:#6c8fff">Intentar de nuevo</a> o escríbenos directamente.</div>';
-  document.getElementById('cal-label').textContent='Error al cargar';
-}
-function renderNoSlots(){
-  document.getElementById('cal-grid').innerHTML='<div style="grid-column:1/-1;padding:24px 0;font-size:13px;color:#64748b;text-align:center;line-height:1.6">Agenda completa por ahora.<br>Escríbenos a <a href="mailto:hola@hisfia.com" style="color:#6c8fff">hola@hisfia.com</a> y te buscamos hueco.</div>';
-  document.getElementById('cal-label').textContent='Sin huecos disponibles';
-}
-
-// ── Calendar ─────────────────────────────────────────────────────────────────
-function renderCal(){
-  document.getElementById('cal-label').textContent=
-    `${MONTHS[viewM].charAt(0).toUpperCase()+MONTHS[viewM].slice(1)} ${viewY}`;
-
-  const g=document.getElementById('cal-grid');
-  g.innerHTML='';
-
-  // Day headers
-  ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'].forEach(d=>{
-    const el=document.createElement('div');
-    el.className='cal-head'; el.textContent=d; g.appendChild(el);
+  // Mostrar el mes actual si tiene huecos, o el primer mes disponible
+  const now = new Date();
+  const nowY = now.getFullYear(), nowM = now.getMonth();
+  const hasThisMonth = dates.some(ds => {
+    const d2 = new Date(ds+'T12:00:00');
+    return d2.getFullYear()===nowY && d2.getMonth()===nowM;
   });
+  if(hasThisMonth){ viewY=nowY; viewM=nowM; }
+  else { const f=new Date(dates[0]+'T12:00:00'); viewY=f.getFullYear(); viewM=f.getMonth(); }
 
-  const firstDay=new Date(viewY,viewM,1);
-  const offset=(firstDay.getDay()+6)%7;
-  const total=new Date(viewY,viewM+1,0).getDate();
-  const todayMs=new Date(); todayMs.setHours(0,0,0,0);
+  renderCal();
+  _hideLoader();
 
-  for(let i=0;i<offset;i++){
-    const el=document.createElement('div'); el.className='cal-cell empty'; g.appendChild(el);
+  if(PRE_DATE&&PRE_TIME&&byDate[PRE_DATE]){
+    const s=byDate[PRE_DATE].find(x=>x.time===PRE_TIME);
+    if(s){pickDate(PRE_DATE);pickTime(s);}
+    if(PRE_NAME)document.getElementById('fn').value=PRE_NAME;
+    if(PRE_EMAIL)document.getElementById('fe').value=PRE_EMAIL;
+    if(PRE_EMPRESA)document.getElementById('fc').value=PRE_EMPRESA;
   }
-  for(let d=1;d<=total;d++){
-    const ds=`${viewY}-${String(viewM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dt=new Date(viewY,viewM,d);
-    const isAvail=availDates.has(ds);
-    const isPast=dt<todayMs;
-    const isToday=dt.getTime()===todayMs.getTime();
-
+}
+function showErr(msg){
+  document.getElementById('cal-grid').innerHTML=
+    `<div style="grid-column:1/-1;padding:24px 0;font-size:13px;color:#6b7280;text-align:center;line-height:1.8">${msg}</div>`;
+}
+function renderCal(){
+  document.getElementById('cal-month').textContent=
+    `${MOS[viewM].charAt(0).toUpperCase()+MOS[viewM].slice(1)} ${viewY}`;
+  const g=document.getElementById('cal-grid');g.innerHTML='';
+  ['L','M','X','J','V','S','D'].forEach(h=>{
+    const el=document.createElement('div');el.className='cal-hd';el.textContent=h;g.appendChild(el);
+  });
+  const first=new Date(viewY,viewM,1);
+  const off=(first.getDay()+6)%7;
+  const total=new Date(viewY,viewM+1,0).getDate();
+  const todayMs=new Date();todayMs.setHours(0,0,0,0);
+  for(let i=0;i<off;i++){const el=document.createElement('div');el.className='cal-cell empty';g.appendChild(el)}
+  for(let day=1;day<=total;day++){
+    const ds=`${viewY}-${String(viewM+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dt=new Date(viewY,viewM,day);
+    const isA=avail.has(ds),isP=dt<todayMs,isT=dt.getTime()===todayMs.getTime();
+    const isFull = !isP && !isA && full.has(ds);
     const el=document.createElement('div');
-    el.className='cal-cell'+(isPast?' past':isAvail?' avail':'')+((isToday)?' today':'');
-    if(ds===selDate) el.classList.add('sel');
-    el.textContent=d;
-    if(isAvail&&!isPast) el.onclick=()=>pickDate(ds,el);
+    el.className='cal-cell'+(isP?' past':isA?' avail':isFull?' full':'')+( isT?' today':'');
+    if(ds===selDate)el.classList.add('sel');
+
+    if(isFull){
+      el.innerHTML=`<span style="display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.1">
+        <span class="cal-num">${day}</span>
+        <span class="cal-tag">Completo</span>
+      </span>`;
+      el.title='Este día no tiene huecos disponibles';
+    }else if(isT){
+      el.innerHTML=`<span style="display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.1"><span>${day}</span><span style="font-size:7px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;opacity:.75">hoy</span></span>`;
+    }else{
+      el.textContent=day;
+    }
+    if(isA&&!isP)el.onclick=()=>pickDate(ds);
     g.appendChild(el);
   }
-
   const now=new Date();
-  document.getElementById('btn-prev').disabled=viewY===now.getFullYear()&&viewM===now.getMonth();
+  document.getElementById('btn-prev').disabled=(viewY===now.getFullYear()&&viewM===now.getMonth());
 }
-
-document.getElementById('btn-prev').onclick=()=>{if(viewM===0){viewM=11;viewY--}else viewM--;renderCal()};
-document.getElementById('btn-next').onclick=()=>{if(viewM===11){viewM=0;viewY++}else viewM++;renderCal()};
-
-// ── Pick date ─────────────────────────────────────────────────────────────────
-function pickDate(ds,el){
-  selDate=ds;
-  document.querySelectorAll('.cal-cell.sel').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-
-  const g=document.getElementById('times-grid');
-  g.innerHTML='';
-  for(const s of (slotsByDate[ds]||[])){
+document.getElementById('btn-prev').onclick=()=>{viewM===0?(viewM=11,viewY--):viewM--;renderCal()};
+document.getElementById('btn-next').onclick=()=>{viewM===11?(viewM=0,viewY++):viewM++;renderCal()};
+function pickDate(ds){
+  selDate=ds;selSlot=null;renderCal();
+  const g=document.getElementById('times-grid');g.innerHTML='';
+  for(const s of (byDate[ds]||[])){
     const b=document.createElement('button');
-    b.type='button'; b.className='time-pill'; b.textContent=s.time;
-    b.onclick=()=>pickTime(b,s,ds);
-    g.appendChild(b);
+    b.type='button';b.className='tp';b.textContent=s.time;
+    b.onclick=()=>pickTime(s);g.appendChild(b);
   }
-  document.getElementById('times-label').textContent=fmtDate(ds);
-  show('step-times');
+  document.getElementById('times-label').textContent=fmt(ds);
+  document.getElementById('times-wrap').classList.add('open');
+  document.getElementById('form-wrap').classList.remove('open');
+  setStep(2);
+  setTimeout(()=>document.getElementById('times-wrap').scrollIntoView({behavior:'smooth',block:'nearest'}),80);
 }
-
-document.getElementById('back1').onclick=()=>show('step-cal');
-
-// ── Pick time ─────────────────────────────────────────────────────────────────
-function pickTime(b,slot,ds){
-  document.querySelectorAll('.time-pill.sel').forEach(x=>x.classList.remove('sel'));
-  b.classList.add('sel');
+function pickTime(slot){
   selSlot=slot;
-  selSlot._label=`${fmtDate(ds)} · ${slot.time}`;
-  document.getElementById('pill-text').textContent=selSlot._label;
-  show('step-form');
+  document.querySelectorAll('.tp.sel').forEach(x=>x.classList.remove('sel'));
+  document.querySelectorAll('.tp').forEach(b=>{if(b.textContent===slot.time)b.classList.add('sel')});
+  const label=`${fmt(selDate)} · ${slot.time}`;
+  document.getElementById('pill-text').textContent=label;
+  // Preparar pantalla de confirmación
+  document.getElementById('ok-date-val').textContent=fmt(selDate);
+  document.getElementById('ok-time-val').textContent=slot.time + 'h';
+  document.getElementById('form-wrap').classList.add('open');
+  setStep(3);
+  setTimeout(()=>document.getElementById('form-wrap').scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+// ── Validación ──────────────────────────────────────────────────────────
+function setFieldState(inputId, errId, ok, msg){
+  const inp = document.getElementById(inputId);
+  const err = errId ? document.getElementById(errId) : null;
+  if(!inp) return ok;
+  inp.classList.toggle('valid', ok);
+  inp.classList.toggle('invalid', !ok);
+  if(err){ err.textContent = ok ? '' : msg; err.classList.toggle('show', !ok); }
+  return ok;
 }
 
-document.getElementById('back2').onclick=()=>show('step-times');
+function validateName(){
+  const v = document.getElementById('fn').value.trim();
+  if(!v) return setFieldState('fn','fn-err',false,'El nombre es obligatorio.');
+  if(v.length < 2) return setFieldState('fn','fn-err',false,'Escribe al menos nombre y apellido.');
+  if(/\d/.test(v)) return setFieldState('fn','fn-err',false,'El nombre no puede contener números.');
+  return setFieldState('fn','fn-err',true,'');
+}
 
-// ── Submit ────────────────────────────────────────────────────────────────────
+function validateEmail(){
+  const v = document.getElementById('fe').value.trim();
+  if(!v) return setFieldState('fe','fe-err',false,'El email es obligatorio.');
+  // RFC-compatible basic check
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  if(!re.test(v)) return setFieldState('fe','fe-err',false,'Introduce un email válido, p.ej. nombre@empresa.com');
+  return setFieldState('fe','fe-err',true,'');
+}
+
+// Normaliza el teléfono a formato limpio y valida
+function normalizePhone(raw){
+  // Quitar espacios, guiones, puntos, paréntesis
+  let p = raw.replace(/[\s\-\.\(\)]/g,'');
+  // Si empieza por 00 → reemplazar por +
+  if(p.startsWith('00')) p = '+' + p.slice(2);
+  return p;
+}
+function validatePhone(){
+  const raw = document.getElementById('fp').value.trim();
+  if(!raw) return true; // opcional
+  const p = normalizePhone(raw);
+  // Internacional: + seguido de 7-15 dígitos
+  if(/^\+\d{7,15}$/.test(p)) return setFieldState('fp','fp-err',true,'');
+  // España sin prefijo: 6, 7, 8, 9 seguido de 8 dígitos (9 en total)
+  if(/^[6-9]\d{8}$/.test(p)) return setFieldState('fp','fp-err',true,'');
+  return setFieldState('fp','fp-err',false,'Formato no válido. Usa 600 123 456 o +34 600 123 456');
+}
+
+// Formatear el teléfono mientras se escribe (España o internacional)
+function formatPhoneInput(e){
+  const inp = e.target;
+  // Guardar posición del cursor antes de formatear
+  const raw = inp.value.replace(/[\s\-\.\(\)]/g,'');
+  // No formatear si está vacío o empieza con +
+  if(!raw){ inp.value=''; return; }
+  let formatted = raw;
+  if(raw.startsWith('+')){
+    // +34 seguido de 9 dígitos → +34 6XX XXX XXX
+    const m = raw.match(/^(\+\d{2})(\d{3})(\d{3})(\d{3})$/);
+    if(m) formatted = `${m[1]} ${m[2]} ${m[3]} ${m[4]}`;
+    else formatted = raw; // no forzar formato para otros países
+  } else if(/^[6-9]\d*$/.test(raw)){
+    // España sin prefijo: 6XX XXX XXX
+    const m = raw.match(/^(\d{3})(\d{3})(\d{3})$/);
+    if(m) formatted = `${m[1]} ${m[2]} ${m[3]}`;
+    else formatted = raw;
+  }
+  inp.value = formatted;
+}
+
 async function submitBook(e){
   e.preventDefault();
-  const btn=document.getElementById('sbtn');
-  const err=document.getElementById('ferr');
+  if(!selSlot) return;
+
+  // Validar todos los campos antes de enviar
+  const okName  = validateName();
+  const okEmail = validateEmail();
+  const okPhone = validatePhone();
+  if(!okName || !okEmail || !okPhone) return;
+
+  const btn = document.getElementById('sbtn');
+  const err = document.getElementById('ferr');
   err.style.display='none';
   btn.disabled=true; btn.textContent='Confirmando…';
 
+  const rawPhone = document.getElementById('fp').value.trim();
+  const phone    = rawPhone ? normalizePhone(rawPhone) : '';
+
   try{
-    const r=await fetch('/api/confirm',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        slot_start:selSlot.start_iso, slot_end:selSlot.end_iso,
-        slot_label:selSlot._label,
-        name:document.getElementById('fn').value.trim(),
-        email:document.getElementById('fe').value.trim(),
-        company:document.getElementById('fc').value.trim(),
-        phone:document.getElementById('fp').value.trim(),
-        notes:document.getElementById('fo').value.trim(),
-        call_id:CALL_ID,
+    const r = await fetch('/api/confirm',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        slot_start: selSlot.start_iso,
+        slot_end:   selSlot.end_iso,
+        slot_label: document.getElementById('pill-text').textContent,
+        name:       document.getElementById('fn').value.trim(),
+        email:      document.getElementById('fe').value.trim().toLowerCase(),
+        company:    document.getElementById('fc').value.trim(),
+        phone,
+        call_id: CALL_ID,
       }),
     });
-    const d=await r.json();
+    const d = await r.json();
     if(d.ok){
-      if(d.meet_url){const a=document.getElementById('meet-a');a.href=d.meet_url;a.style.display='inline-flex'}
-      show('step-ok');
-    } else {
-      err.textContent=d.message||'Error. Inténtalo de nuevo.';
+      document.getElementById('booking-body').style.display='none';
+      const ok=document.getElementById('step-ok'); ok.classList.add('active');
+      if(d.meet_url){ const a=document.getElementById('meet-a'); a.href=d.meet_url; a.style.display='inline-flex'; }
+    }else{
+      err.innerHTML = d.message||'Error. Inténtalo de nuevo.';
       err.style.display='block';
       btn.disabled=false; btn.textContent='Confirmar reserva →';
     }
   }catch(ex){
-    err.textContent='Error de conexión. Inténtalo de nuevo.';
+    err.innerHTML='Error de conexión. Inténtalo de nuevo.';
     err.style.display='block';
     btn.disabled=false; btn.textContent='Confirmar reserva →';
   }
 }
 
+// Attach listeners después del DOM
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('fn')?.addEventListener('blur', validateName);
+  document.getElementById('fe')?.addEventListener('blur', validateEmail);
+  document.getElementById('fp')?.addEventListener('blur', validatePhone);
+  document.getElementById('fp')?.addEventListener('input', formatPhoneInput);
+});
 init();
+
+// ── Canvas de partículas (solo desktop) ─────────────────────────────────
+(function(){
+  if(window.innerWidth < 860) return; // no en móvil
+  const canvas = document.getElementById('bg-canvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize(){
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', ()=>{ resize(); initParticles(); });
+
+  const N = 55;
+  const CYAN = '34,211,238';
+  let particles = [];
+
+  function initParticles(){
+    particles = [];
+    for(let i=0;i<N;i++){
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: 1 + Math.random() * 2.2,
+        vx: (Math.random()-.5) * .35,
+        vy: (Math.random()-.5) * .35,
+        a: .15 + Math.random() * .45,
+      });
+    }
+  }
+  initParticles();
+
+  const LINK_DIST = 140;
+
+  function draw(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Líneas entre partículas cercanas
+    for(let i=0;i<particles.length;i++){
+      for(let j=i+1;j<particles.length;j++){
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const d  = Math.sqrt(dx*dx + dy*dy);
+        if(d < LINK_DIST){
+          const alpha = (1 - d/LINK_DIST) * .12;
+          ctx.strokeStyle = `rgba(${CYAN},${alpha})`;
+          ctx.lineWidth   = .8;
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Partículas
+    for(const p of particles){
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(${CYAN},${p.a})`;
+      ctx.fill();
+    }
+  }
+
+  function update(){
+    for(const p of particles){
+      p.x += p.vx;
+      p.y += p.vy;
+      if(p.x < 0)           p.x = canvas.width;
+      if(p.x > canvas.width)  p.x = 0;
+      if(p.y < 0)           p.y = canvas.height;
+      if(p.y > canvas.height) p.y = 0;
+    }
+  }
+
+  function loop(){
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+  loop();
+})();
 </script>
 </body>
 </html>
