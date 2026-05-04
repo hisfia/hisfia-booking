@@ -642,9 +642,10 @@ async function init(){
   // Calcular rango de días laborables cubiertos por la API
   // y marcar como "completo" los que no tienen ningún hueco
   const dates = d.slots.map(s=>s.date).sort();
-  slotRangeStart = new Date(dates[0]+'T12:00:00');
-  slotRangeEnd   = new Date(dates[dates.length-1]+'T12:00:00');
   const todayMs  = new Date(); todayMs.setHours(0,0,0,0);
+  // El rango empieza desde mañana (no desde el primer slot) para capturar días bloqueados
+  slotRangeStart = new Date(todayMs.getTime() + 86400000);
+  slotRangeEnd   = new Date(dates[dates.length-1]+'T12:00:00');
   const cursor   = new Date(slotRangeStart);
   while(cursor <= slotRangeEnd){
     const dow = cursor.getDay();
