@@ -643,17 +643,16 @@ async function init(){
   // y marcar como "completo" los que no tienen ningún hueco
   const dates = d.slots.map(s=>s.date).sort();
   const todayMs  = new Date(); todayMs.setHours(0,0,0,0);
-  // El rango empieza desde mañana (no desde el primer slot) para capturar días bloqueados
-  slotRangeStart = new Date(todayMs.getTime() + 86400000);
-  slotRangeEnd   = new Date(dates[dates.length-1]+'T12:00:00');
+  // Usar UTC midnight para que toISOString() devuelva la fecha correcta (sin desfase de zona horaria)
+  const todayUTC = new Date(); todayUTC.setUTCHours(0,0,0,0);
+  slotRangeStart = new Date(todayUTC.getTime() + 86400000);
+  slotRangeEnd   = new Date(dates[dates.length-1]+'T12:00:00Z');
   const cursor   = new Date(slotRangeStart);
   while(cursor <= slotRangeEnd){
-    const dow = cursor.getDay();
-    if(dow !== 0 && dow !== 6){
-      const ds = cursor.toISOString().slice(0,10);
-      if(!avail.has(ds) && new Date(ds+'T12:00:00') >= todayMs) full.add(ds);
-    }
-    cursor.setDate(cursor.getDate()+1);
+    const ds  = cursor.toISOString().slice(0,10); // fecha UTC correcta
+    const dow = cursor.getUTCDay();               // día semana UTC (0=dom, 6=sáb)
+    if(dow !== 0 && dow !== 6 && !avail.has(ds)) full.add(ds);
+    cursor.setUTCDate(cursor.getUTCDate()+1);
   }
 
   // Mostrar el mes actual si tiene huecos, o el primer mes disponible
